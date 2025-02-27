@@ -1,0 +1,16 @@
+services:
+  express:
+    image: node:alpine
+    container_name: express
+    working_dir: /app
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - ./node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=${NODE_ENV}
+    command: sh -c "npm install && npm run dev"
+    restart: always
