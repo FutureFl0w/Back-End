@@ -1,17 +1,22 @@
-FROM node:alpine
+FROM node:21-alpine3.18 AS builder
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-COPY package.json ./
+COPY package*.json ./
 
-RUN npm install --production
+RUN npm install
 
 COPY . .
 
-RUN npx tsc
+RUN npm run build
 
-EXPOSE $PORT
+FROM node:21-alpine3.18
 
-ENV NODE_ENV=production
+WORKDIR /usr/src/app
 
-CMD ["node", "dist/server.js"]
+COPY --from=builder /usr/src/app/dist ./dist
+COPY package*.json ./
+
+RUN npm install --only=production
+
+CMD ["node", "dist/index.js"]

@@ -1,0 +1,60 @@
+stages:
+  - code_quality
+  - build_and_scan
+  - test
+
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ''
+
+services:
+  - name: docker:dind
+
+.default_job: &default_job
+  image: node:21-slim
+  cache:
+    paths:
+      - node_modules/
+  tags:
+    - docker
+    - node
+  before_script:
+    - apt-get update && apt-get install -y git 
+    - npm ci
+
+eslint_check:
+  <<: *default_job
+  stage: code_quality
+  script:
+    - npm run lint:fix
+  allow_failure: false
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop"
+
+prettier_format:
+  <<: *default_job
+  stage: code_quality
+  script:
+    - npm run prettier
+    - git diff --exit-code || (echo "Formatting issues detected. Please run 'npm run prettier' locally." && exit 1)
+  allow_failure: false
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop"
+
+sonarqube:
+  stage: build_and_scan
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  script:
+    - sonar-scanner -Dsonar.projectKey=$CI_PROJECT_NAME
+  allow_failure: true
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "beta"
+  variables:
+    SONAR_HOST_URL: $SONAR_HOST_URL_BETA
+    SONAR_TOKEN: $SONAR_TOKEN_BETA
+  tags:
+    - docker
+  

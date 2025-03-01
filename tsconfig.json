@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ESNext",           // Use ESNext target to enable ES modules
-    "module": "ESNext",           // Enable ES module output
-    "moduleResolution": "node",   // Use Node.js module resolution
-    "esModuleInterop": true,      // Allow default imports from non-ES modules
-    "outDir": "./dist",           // Output directory for compiled JS files
+    "target": "es2021",
+    "module": "commonjs",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "strict": true
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "dist",
+    "resolveJsonModule": true
   },
-  "include": [
-    "server.ts",                  // Include your main TypeScript file
-    "src/**/*"                    // Include other source files
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
-
